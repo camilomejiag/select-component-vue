@@ -3,18 +3,29 @@
         <SelectItem
                 class="select__input"
                 v-bind:option="defaultOption"
-                v-bind:class="{ 'select__input--active': selectBoolean}"
+                v-bind:small="small"
+                v-bind:class="{
+                    'select__input--active': selectBoolean,
+                    'select__input--small': small
+                }"
         />
-        <div class="select__icon-container" v-bind:class="{'select__icon-container--active': selectBoolean}">
-            <font-awesome-icon class="select__icon" icon="angle-up" @click="changeSelect" v-if="selectBoolean"/>
-            <font-awesome-icon class="select__icon" icon="angle-down" @click="changeSelect" v-else/>
+        <div
+                class="select__icon-container"
+                @click="changeSelect"
+                v-bind:class="{
+                    'select__icon-container--active': selectBoolean,
+                    'select__icon-container--small': small
+                }">
+            <font-awesome-icon class="select__icon" icon="angle-up" v-if="selectBoolean"/>
+            <font-awesome-icon class="select__icon" icon="angle-down" v-else/>
         </div>
         <div class="select__dropdown" multiple v-if="selectBoolean">
             <SelectItem
-                    v-for="(option, index) in availableOptions"
+                    v-for="(option, index) in options"
                     v-bind:key="index"
                     v-bind:index="index"
                     v-bind:option="option"
+                    v-bind:small="small"
                     @clickItem="addToList"
             />
         </div>
@@ -22,7 +33,6 @@
 </template>
 
 <script>
-    // import { ohJeezService } from "../core/services/OhJeezService";
     import SelectItem from "./SelectItem";
 
     export default {
@@ -30,31 +40,9 @@
         components: {
             SelectItem
         },
+        props: ['options', 'defaultOption', 'small'],
         data() {
             return {
-                defaultOption: {
-                    value: '0',
-                    label: 'Default',
-                    selected: false
-                },
-                availableOptions: [
-                    {
-                        value: '1',
-                        label: 'Value 1',
-                        selected: false
-                    },
-                    {
-                        value: '2',
-                        label: 'Value 2',
-                        selected: false
-                    },
-                    {
-                        value: '3',
-                        label: 'Value 3',
-                        selected: false
-                    }
-                ],
-                selectedOptions: [],
                 selectBoolean: false,
                 event: {}
             }
@@ -63,21 +51,9 @@
             changeSelect() {
                 this.selectBoolean = !this.selectBoolean;
             },
-            hideSelect() {
-                this.selectBoolean = false;
-            },
             addToList(index) {
-                if (this.availableOptions[index].selected) {
-                    this.availableOptions[index].selected = true;
-                    this.selectedOptions[index].selected = false;
-                } else {
-                    this.availableOptions[index].selected = false
-                    this.selectedOptions[index].selected = true;
-                }
+                this.$emit('addToList', index);
             }
-        },
-        created() {
-            this.selectedOptions = [...this.availableOptions]
         }
     }
 </script>
@@ -88,10 +64,15 @@
     display: flex;
     flex-direction: column;
     position: relative;
+    margin-right: 20px;
 
     &__input {
         height: 40px;
         border-radius: 4px;
+
+        &--small {
+            width: 150px;
+        }
 
         &--active {
             border-color: #70d5b3;
@@ -99,7 +80,9 @@
     }
 
     &__icon {
-        padding-top: 12px;
+        top: 12px;
+        position: relative;
+        left: 15px;
 
         &-container {
             position: relative;
@@ -110,7 +93,16 @@
             bottom: 42px;
             left: 158px;
 
-            &--active {
+            &--small {
+                left: 110px;
+                border: none;
+            }
+
+            &:hover {
+                cursor: pointer;
+            }
+
+            &--active:not(&--small) {
                 background-color: #dff7ef;
                 border-color: #70d5b3;
                 color: #70d5b3;
